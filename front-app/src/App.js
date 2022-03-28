@@ -6,7 +6,7 @@ function App() {
   const [state, setState] = useState({})
 
   useEffect(() => {
-    fetch("http://192.168.1.32:5000/api").then(response => {
+    fetch("https://tavordle.herokuapp.com/api").then(response => {
       if(response.status == 200){
         return response.json()
       }
