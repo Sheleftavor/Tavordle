@@ -1,38 +1,24 @@
 import logo from './logo.svg';
-import './App.css';
-import {useState, useEffect} from 'react';
+import './css/App.css';
+import React, { useState, useEffect } from 'react';
+import Header from './Components/Header';
 
-function App() {
-  const [state, setState] = useState({})
+export default class App extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
 
-  useEffect(() => {
-    fetch("https://tavordle.herokuapp.com/api").then(response => {
-      if(response.status == 200){
-        return response.json()
-      }
-    }).then(data => console.log(data))
-    .then(error => console.log(error))
-  },[])
+    }
 
-  return (
-    <div className="App">
-      <div></div>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Header />
+  
+  
+      </div>
+    );
+  }
 }
-
-export default App;

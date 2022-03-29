@@ -5,7 +5,7 @@ import logging
 # Configure application
 app = Flask(__name__, static_folder='front-app/build', static_url_path='')
 #secret key
-app.config["SECRET_KEY"] = 'cvO4S87_f-r$jRDHKJ54YUFGFF'
+app.config["SECRET_KEY"] = 'asdasRDW5%#^rt&466rsDFHtyfRgtuy*gfc'
 
 @app.before_first_request
 def before_first_request():
