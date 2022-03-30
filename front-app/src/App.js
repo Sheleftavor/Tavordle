@@ -1,11 +1,9 @@
 import './css/App.css';
 import React from 'react';
 import Header from './Components/Header';
-import Modal from 'react-modal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import Switch from "react-switch";
 import SettingsModal from './Components/settingsModal';
+import Board from './Components/Board';
+import Keyboard from './Components/Keyboard';
 
 const languages = [
   { value: 'En', label: 'En' },
@@ -20,6 +18,9 @@ export default class App extends React.Component {
       darkThemeOn: true,
       hardModeOn: false,
       selectedLanguage: languages[0],
+      wordsArr: ["ccoll", "kllkl", "", "", "", ""],
+      wordsNum: 2,
+      selectedWord: "flick"
     }
   }
 
@@ -47,6 +48,15 @@ export default class App extends React.Component {
           toggleHardMode={this.toggleHardMode}
         />
         
+        <div className='gameContainer'>
+          <Board
+            wordsArr={this.state.wordsArr}
+            wordsNum={this.state.wordsNum}
+            selectedWord={this.state.selectedWord}
+          />
+
+          <Keyboard />
+        </div>
       </div>
     );
   }
