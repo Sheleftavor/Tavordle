@@ -1,6 +1,8 @@
-from flask import Flask, send_from_directory, session
+from asyncio import constants
+from flask import Flask, send_from_directory, session, request
 from flask_cors import CORS, cross_origin
-import logging
+import logging, json
+import HelpFunc
 
 # Configure application
 app = Flask(__name__, static_folder='front-app/build', static_url_path='')
@@ -44,7 +46,35 @@ def after_request(response):
 @app.route("/api", methods=["GET", "POST"])
 @cross_origin()
 def index():
-    return {"hello" : "asdsa"}
+    if request.method == "POST":
+        # get data from request
+        wordArr, selectedWord, hardModeOn = request.json["word"], request.json["selectedWord"].lower(), request.json["hardModeOn"]
+        # make word from wordArr
+        currentWord = ""
+        for w in wordArr:
+            currentWord += w["letter"].lower()
+
+        # check if word is valid
+        if len(currentWord) != 5:
+            return json.dumps({"status" : "error", "message": "Word not full"})
+        with open("Words.txt") as wordsFile:
+            if (currentWord + "\n") not in wordsFile:
+                return json.dumps({"status": "error", "message": "Invalid word"})
+        
+        if currentWord != selectedWord:
+            wordArr = HelpFunc.check_word(wordArr, selectedWord, currentWord)
+            return json.dumps({"status": "success", "wordArr": wordArr})
+
+    elif request.method == "GET":
+        # create game arr
+        wordsArr = [[] for x in range(6)]
+        for i in range(6):
+            for k in range(5):
+                wordsArr[i].append({"letter": "", "color": ""})
+        selectedWord = "apple"
+        wordCount = 56
+        
+        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount})
 
 @app.route("/")
 @cross_origin()

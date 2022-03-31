@@ -127,7 +127,7 @@ export default class SettingsModal extends React.Component {
     
               <div className='settingsModalFooter'>
                 <div className='settingsModalFooterCreator' onClick={() => window.open("https://www.linkedin.com/in/shelef-tavor-40183520b/", "_blank")}>Built & Designed By Shelef Tavor</div>
-                <div className='settingsModalFooterNumber'>#999</div>
+              <div className='settingsModalFooterNumber'>#{this.props.wordCount}</div>
               </div>
             </Modal>
         )
