@@ -37,6 +37,18 @@
     background-color: rgba(148, 148, 148, 0.644);
 }
 
+.letterK-black {
+    background-color: rgb(54, 54, 54);
+}
+
+.letterK-green {
+    background-color: #538d4e;
+}
+
+.letterK-orange {
+    background-color: #b59f3b;
+}
+
 .rowSpacer {
     flex: 0.5;
 }

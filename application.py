@@ -1,8 +1,8 @@
-from asyncio import constants
 from flask import Flask, send_from_directory, session, request
 from flask_cors import CORS, cross_origin
-import logging, json
+import logging, json, psycopg2
 import HelpFunc
+from datetime import datetime
 
 # Configure application
 app = Flask(__name__, static_folder='front-app/build', static_url_path='')
@@ -42,6 +42,11 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+# Define database
+# DATABASE_URL = os.environ['DATABASE_URL']
+# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+conn = psycopg2.connect("postgres://qlcewgcgtwwthu:4550e7f167077a3f1b102300b99b050ec253eecb9aba406c414cf104a3a94fe3@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/d9tbqum2i1r382")
+db = conn.cursor()
 
 @app.route("/api", methods=["GET", "POST"])
 @cross_origin()
@@ -57,7 +62,7 @@ def index():
         # check if word is valid
         if len(currentWord) != 5:
             return json.dumps({"status" : "error", "message": "Word not full"})
-        with open("Words.txt") as wordsFile:
+        with open("Words.txt", "r") as wordsFile:
             if (currentWord + "\n") not in wordsFile:
                 return json.dumps({"status": "error", "message": "Invalid word"})
         
@@ -71,8 +76,8 @@ def index():
         for i in range(6):
             for k in range(5):
                 wordsArr[i].append({"letter": "", "color": ""})
-        selectedWord = "apple"
-        wordCount = 56
+        
+        selectedWord, wordCount = HelpFunc.generate_word(db, conn)
         
         return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount})
 

@@ -145,7 +145,7 @@ export default class App extends React.Component {
               shakeBoard={this.state.shakeBoard}
             />
 
-            <Keyboard handleKeyboard={this.handleKeyboard} />
+            <Keyboard handleKeyboard={this.handleKeyboard} wordsArr={this.state.wordsArr} wordsNum={this.state.wordsNum} />
           </div>
 
           <Popup errorMessage={this.state.errorMessage} />
