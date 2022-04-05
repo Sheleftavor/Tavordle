@@ -13,6 +13,10 @@ const languages = [
   { value: 'He', label: 'He' }
 ]
 
+var tommorow = new Date()
+tommorow.setDate(tommorow.getDate() + 1)
+tommorow.setHours(0, 0, 0, 0)
+
 export default class App extends React.Component {
   constructor(props) {
     super(props)
@@ -31,7 +35,8 @@ export default class App extends React.Component {
       statModalVisible: false,
       stats: "",
       gameFinished: false,
-      wordGuessed: false
+      wordGuessed: false,
+      countdown: 0
     }
 
     this.toggleModal = this.toggleModal.bind(this)
@@ -55,7 +60,17 @@ export default class App extends React.Component {
         wordGuessed: result["correct"],
         statModalVisible: result["finished"]
       })
+      // run countdown if game finished
+      if (result["finished"]) {
+        this.countdown()
+        setInterval(this.countdown, 1000)
+      }
 
+      // if word not guessed show word
+      if (!result.correct && result.finished) {
+        this.setState({ errorMessage: result["selectedWord"] })
+        document.getElementById("popup").classList.add("showPopup")
+      }
     } catch (err) {
       const errMessage = err.message
     }
@@ -122,6 +137,10 @@ export default class App extends React.Component {
         this.setState(prevstate => ({wordsArr: result["wordsArr"], wordsNum: prevstate.wordsNum + 1}))
       }
       else {
+        // start countdown
+        this.countdown()
+        setInterval(this.countdown, 1000)
+
         this.setState({
           gameFinished: true,
           wordGuessed: result.correct,
@@ -129,6 +148,12 @@ export default class App extends React.Component {
           statModalVisible: true,
           stats: result.stats
         })
+
+        // if word not guessed show word
+        if (!result.correct && result.finished) {
+          this.setState({ errorMessage: this.state.selectedWord })
+          document.getElementById("popup").classList.add("showPopup")
+        }
       }
         
     } catch (err) {
@@ -143,6 +168,24 @@ export default class App extends React.Component {
       this.setState({ shakeBoard: false })
       document.getElementById("popup").classList.remove("showPopup")
       }, 750)
+  }
+
+  countdown = () => {
+    var now = new Date();
+    // if day is passed reload page to get new word
+    if (now > tommorow) { 
+      window.location.reload()
+    }
+    var remain = ((tommorow - now) / 1000);
+    var hh = this.pad((remain / 60 / 60) % 60);
+    var mm = this.pad((remain / 60) % 60);
+    var ss = this.pad(remain % 60);
+
+    this.setState({countdown: hh + ":" + mm + ":" + ss})
+  }
+
+  pad = (num) => {
+    return ("0" + parseInt(num)).substr(-2);
   }
 
 
@@ -169,6 +212,8 @@ export default class App extends React.Component {
           />
 
           <StatModal {...this.state} toggleModal={this.toggleModal} />
+
+          
 
           <Popup errorMessage={this.state.errorMessage} />
         </div>

@@ -125,6 +125,7 @@ def index():
             session["wordsArr"] = wordsArr
             session["date"] = today
             session["wordsNum"] = 0
+            session["finished"] = session["correct"] = False
             wordsNum = 0
         
         selectedWord, wordCount = HelpFunc.generate_word(db, conn)
@@ -132,7 +133,7 @@ def index():
         # get stats
         stats = HelpFunc.get_stats(db)
             
-        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount, "wordsNum": wordsNum, "stats": stats, "finished": session.get("finished") is not None, "correct": session.get("correct") if session.get("correct") is not None else False})
+        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount, "wordsNum": wordsNum, "stats": stats, "finished": session.get("finished") if session.get("finished") is not None else False, "correct": session.get("correct") if session.get("correct") is not None else False})
 
 @app.route("/")
 def serve():

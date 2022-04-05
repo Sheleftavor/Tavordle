@@ -4,6 +4,31 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faShareNodes } from '@fortawesome/free-solid-svg-icons';
 import '../css/StatModal.css'
 
+const copyClip = (wordsArr, wordCount, wordsNum, wordGuessed) => {
+    var message = `Tavordle ${wordCount} ${wordGuessed ? wordsNum + 1 : "X"}/6 \n\n`
+
+    for (let i = 0; i <= wordsNum; i++) {
+        let row = ''
+        for (let k = 0; k < 5; k++){
+            switch (wordsArr[i][k].color) {
+                case "Green":
+                    row += "🟩"
+                    break
+                case "Orange":
+                    row += "🟨"
+                    break
+                case "Black":
+                    row += "⬛"
+                    break
+                default:
+                    break
+            }
+        }
+        message += row + "\n"
+    }
+    navigator.clipboard.writeText(message)
+}
+
 const StatModal = (props) => {
     const max_guess = Math.max(...props.stats.games)
 
@@ -87,10 +112,10 @@ const StatModal = (props) => {
                 <div className="statsFooter">
                     <div className="footerNextWordle">
                         <div className="footerText">NEXT WORDLE</div>
-                        <div className="countdown">08:23:32</div>
+                        <div className="countdown">{props.countdown}</div>
                     </div>
                     <div className="footerShare">
-                        <button className="shareButton">
+                        <button className="shareButton" onClick={() => copyClip(props.wordsArr, props.wordCount, props.wordsNum, props.wordGuessed)}>
                             Share
                             <FontAwesomeIcon icon={faShareNodes} style={{marginLeft: '5px'}} />
                         </button>
