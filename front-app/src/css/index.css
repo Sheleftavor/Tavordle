@@ -34,3 +34,11 @@ code {
   opacity: 0;
   transform: translatey(100px);
 }
+
+body.ReactModal__Body--open > #root {
+  filter: brightness(0.5);
+}
+
+.ReactModalPortal .ReactModal__Overlay  {
+  background-color: unset !important;
+}

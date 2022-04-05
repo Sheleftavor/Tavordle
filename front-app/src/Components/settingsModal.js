@@ -73,12 +73,13 @@ export default class SettingsModal extends React.Component {
             <Modal
               closeTimeoutMS={400}
               isOpen={this.props.settingsModalVisible}
-              onRequestClose={this.props.toggleSettingModal}
+              onRequestClose={() => this.props.toggleModal("settingsModalVisible")}
               className="settingsModal"
+              centered
             >
               <div className='modalHeader'>
                 SETTINGS
-                <FontAwesomeIcon icon={faXmark} className="exitModal" onClick={this.props.toggleSettingModal} />
+                <FontAwesomeIcon icon={faXmark} className="exitModal" onClick={() => this.props.toggleModal("settingsModalVisible")} />
               </div>
     
               <div className='settingsModalBody'>
@@ -126,7 +127,7 @@ export default class SettingsModal extends React.Component {
               </div>
     
               <div className='settingsModalFooter'>
-                <div className='settingsModalFooterCreator' onClick={() => window.open("https://www.linkedin.com/in/shelef-tavor-40183520b/", "_blank")}>Built & Designed By Shelef Tavor</div>
+                <a className='settingsModalFooterCreator' target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/shelef-tavor-40183520b/">Built & Designed By Shelef Tavor</a>
               <div className='settingsModalFooterNumber'>#{this.props.wordCount}</div>
               </div>
             </Modal>

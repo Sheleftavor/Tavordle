@@ -4,7 +4,7 @@ import random
 
 # function for getting all the 5 letter words from words list
 def get_words():
-    with open('words-big.txt', 'r') as in_file, open('Words.txt', 'w') as out_file:
+    with open('usa.txt', 'r') as in_file, open('Words.txt', 'w') as out_file:
         for line in in_file:
             line = line.replace("\n", "")
             if len(line) == 5 and line.isalpha():
@@ -78,3 +78,33 @@ def generate_word(db, conn):
         conn.commit()
     
     return [newWord, id]
+
+def create_wordsArr():
+    wordsArr = [[] for x in range(6)]
+    for i in range(6):
+        for k in range(5):
+            wordsArr[i].append({"letter": "", "color": ""})
+    return wordsArr
+
+def get_wins_percentage(stats):
+    total_games = stats[2]
+    games = stats[3]
+    return int(sum(games) / total_games * 100)
+
+def get_stats(db):
+    stats = {}
+    if session.get("user_id") is not None:
+        db.execute("SELECT current_streak, max_streak, total_games, games FROM users WHERE id = %s", (session["user_id"],))
+        stats_tmp = db.fetchone()
+        stats["current_streak"] = stats_tmp[0]
+        stats["max_streak"] = stats_tmp[1]
+        stats["total_games"] = stats_tmp[2]
+        stats["games"] = stats_tmp[3]
+        stats["wins_percentage"] = get_wins_percentage(stats_tmp)
+    else:
+        stats["current_streak"] = 0
+        stats["max_streak"] = 0
+        stats["total_games"] = 0
+        stats["games"] = [0 for i in range(6)]
+        stats["wins_percentage"] = 0
+    return stats

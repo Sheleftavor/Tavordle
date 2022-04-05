@@ -11,11 +11,8 @@ export default class Keyboard extends React.Component {
         this.orangeLettersArr = []
         this.greenLettersArr = []
     }
-
     
-
     getColor = (c) => {
-        console.log(this.blackLettersArr)
         if (this.greenLettersArr.includes(c))
             return "letterK letterK-green"
         else if (this.orangeLettersArr.includes(c))

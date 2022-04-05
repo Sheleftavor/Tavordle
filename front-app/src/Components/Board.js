@@ -7,7 +7,7 @@ const Board = (props) => {
             <div className="board">
                 {[...Array(6)].map((x, i) => {
                     // word already guessed
-                    if (i < props.wordsNum) {
+                    if (i < props.wordsNum || (i === props.wordsNum && props.gameFinished)) {
                         const word = props.wordsArr[i]
                         return (
                             <div className="boardRow" key={i}>{word.map((letter, k) => {

@@ -6,8 +6,8 @@ import { faGear, faChartColumn, faCircleInfo } from '@fortawesome/free-solid-svg
 const Header = (props) => {
     return (
         <div className="Container">Tavordle
-            <FontAwesomeIcon icon={faGear} className="gear" onClick={props.openModal} />
-            <FontAwesomeIcon icon={faChartColumn} className="stats" />
+            <FontAwesomeIcon icon={faGear} className="gear" onClick={() => props.openModal("settingsModalVisible")} />
+            <FontAwesomeIcon icon={faChartColumn} className="statIcon" onClick={() => props.openModal("statModalVisible")} />
             <FontAwesomeIcon icon={faCircleInfo} className="info" />
         </div>
     )

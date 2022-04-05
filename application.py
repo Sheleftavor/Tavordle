@@ -1,4 +1,5 @@
-from flask import Flask, send_from_directory, session, request
+from os import stat
+from flask import Flask, send_from_directory, session, request, make_response
 from flask_cors import CORS, cross_origin
 import logging, json, psycopg2
 import HelpFunc
@@ -16,7 +17,7 @@ def before_first_request():
     app.logger.setLevel(logging.INFO)
 
 # configure cors
-CORS(app)
+CORS(app, supports_credentials=True)
 
 app.config.update(
     REMEMBER_COOKIE_SECURE = True,
@@ -45,15 +46,15 @@ def after_request(response):
 # Define database
 # DATABASE_URL = os.environ['DATABASE_URL']
 # conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-conn = psycopg2.connect("postgres://qlcewgcgtwwthu:4550e7f167077a3f1b102300b99b050ec253eecb9aba406c414cf104a3a94fe3@ec2-52-212-228-71.eu-west-1.compute.amazonaws.com:5432/d9tbqum2i1r382")
+conn = psycopg2.connect("postgres://imzwprcviecrhh:7508e58ac73a6d99d660b68517be9820b2bfb28287eeec9db3935ebe77507bae@ec2-34-248-169-69.eu-west-1.compute.amazonaws.com:5432/d53n09ml7prg1s")
 db = conn.cursor()
 
 @app.route("/api", methods=["GET", "POST"])
-@cross_origin()
 def index():
     if request.method == "POST":
         # get data from request
-        wordArr, selectedWord, hardModeOn = request.json["word"], request.json["selectedWord"].lower(), request.json["hardModeOn"]
+        wordsArr, selectedWord, hardModeOn, wordsNum = request.json["wordsArr"], request.json["selectedWord"].lower(), request.json["hardModeOn"], request.json["wordsNum"]
+        wordArr = wordsArr[wordsNum]
         # make word from wordArr
         currentWord = ""
         for w in wordArr:
@@ -66,25 +67,79 @@ def index():
             if (currentWord + "\n") not in wordsFile:
                 return json.dumps({"status": "error", "message": "Invalid word"})
         
-        if currentWord != selectedWord:
-            wordArr = HelpFunc.check_word(wordArr, selectedWord, currentWord)
-            return json.dumps({"status": "success", "wordArr": wordArr})
+        # edit wordsArr with new guessed word        
+        wordArr = HelpFunc.check_word(wordArr, selectedWord, currentWord)
+        wordsArr[wordsNum] = wordArr
+        session["wordsArr"] = wordsArr
+        
+        # if wrong guess and there are guesses left
+        if currentWord != selectedWord and wordsNum < 5:
+            session["wordsNum"] = int(wordsNum) + 1
+            return json.dumps({"status": "wrong", "wordsArr": wordsArr})
+        
+        # if its not first time playing
+        if session.get("user_id") is not None:
+            db.execute("SELECT current_streak, max_streak FROM users WHERE id = %s", (session["user_id"], ))
+            current_streak, max_streak = db.fetchone()
+        else:
+            current_streak = 0
+            max_streak = 0
+        # if didnt guess the word
+        if currentWord != selectedWord and wordsNum == 5:
+            current_streak = 0
+        # if word was guessed
+        elif currentWord == selectedWord:
+            current_streak += 1
+            # check for max streak
+            if current_streak > max_streak:
+                max_streak = current_streak
+            
+        if session.get("user_id") is None:
+            # initilize games arr
+            gamesArr = [0 for i in range(6)]
+            # add guess place to array
+            if not (currentWord != selectedWord and wordsNum == 5):
+                gamesArr[wordsNum] += 1
+            # insert into db
+            db.execute("INSERT INTO users (current_streak, max_streak, total_games, games) VALUES (%s, %s, %s, %s) RETURNING id", (current_streak, max_streak, 1, gamesArr))
+            # set user id at session
+            id = db.fetchone()[0]
+            session["user_id"] = id
+        else:
+            db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum, wordsNum, session["user_id"]))
+        conn.commit()
+        
+        stats = HelpFunc.get_stats(db)
+        
+        session["finished"] = True
+        session["correct"] = currentWord == selectedWord
+        
+        return json.dumps({"status": "finished", "wordsArr": wordsArr, "stats" : stats, "correct": currentWord == selectedWord})
+        
 
     elif request.method == "GET":
-        # create game arr
-        wordsArr = [[] for x in range(6)]
-        for i in range(6):
-            for k in range(5):
-                wordsArr[i].append({"letter": "", "color": ""})
+        wordsArr = session.get("wordsArr")
+        wordsNum = session.get("wordsNum")
+        today = datetime.today().strftime("%Y-%m-%d")
+        # create game arr 
+        if wordsArr is None or session.get("date") != today:
+            wordsArr = HelpFunc.create_wordsArr()
+            session["wordsArr"] = wordsArr
+            session["date"] = today
+            session["wordsNum"] = 0
         
         selectedWord, wordCount = HelpFunc.generate_word(db, conn)
         
-        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount})
+        # get stats
+        stats = HelpFunc.get_stats(db)
+            
+        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount, "wordsNum": wordsNum, "stats": stats, "finished": session.get("finished") is not None, "correct": session.get("correct") if session.get("correct") is not None else False})
 
 @app.route("/")
-@cross_origin()
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
+    
+    

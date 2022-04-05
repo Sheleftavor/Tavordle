@@ -6,6 +6,7 @@ import Board from './Components/Board';
 import Keyboard from './Components/Keyboard';
 import Popup from './Components/Popup';
 import { getData, handleWord } from './api';
+import StatModal from './Components/StatModal';
 
 const languages = [
   { value: 'En', label: 'En' },
@@ -26,8 +27,14 @@ export default class App extends React.Component {
       selectedWord: "",
       shakeBoard: false,
       errorMessage: "",
-      wordCount: 0
+      wordCount: 0,
+      statModalVisible: false,
+      stats: "",
+      gameFinished: false,
+      wordGuessed: false
     }
+
+    this.toggleModal = this.toggleModal.bind(this)
   }
 
   componentDidMount() {
@@ -41,7 +48,12 @@ export default class App extends React.Component {
         wordsArr: result["wordsArr"],
         selectedWord: result["selectedWord"],
         wordCount: result["wordCount"],
-        boardLoaded: true
+        boardLoaded: true,
+        wordsNum: parseInt(result["wordsNum"]),
+        stats: result["stats"],
+        gameFinished: result["finished"],
+        wordGuessed: result["correct"],
+        statModalVisible: result["finished"]
       })
 
     } catch (err) {
@@ -49,7 +61,7 @@ export default class App extends React.Component {
     }
   }
 
-  toggleSettingModal(name) {
+  toggleModal(name) {
     this.setState(prevstate => ({ [name]: !prevstate[name] }))
   }
 
@@ -62,52 +74,61 @@ export default class App extends React.Component {
   }
 
   handleKeyboard = (key) => {
-    let currentWord = this.state.wordsArr[this.state.wordsNum]
-    // add key to current work
-    if (key !== "Enter" && key !== "Delete") {
-      // check where to place letter
-      let i = 0;
-      while (i < 5 && currentWord[i]["letter"] !== "")
-        i++;
-      if (i < 5)
-        currentWord[i]["letter"] = key
-    }
-    // backspace
-    else if (key === "Delete") {
-      // get last letter and delete it
-      let i = 0;
-      while (i < 5 && currentWord[i]["letter"] !== "")
-        i++;
-      if (i > 0)
-        currentWord[i - 1]["letter"] = ""
-    }
-    else if (key === "Enter") {
-      // if word does not have 5 letter the last letter will be empty
-      if (currentWord[4]["letter"] === "") {
-        // shake row
-        this.shakeRow("Word not full")
+    if (!this.state.gameFinished) {
+      let currentWord = this.state.wordsArr[this.state.wordsNum]
+      // add key to current work
+      if (key !== "Enter" && key !== "Delete") {
+        // check where to place letter
+        let i = 0;
+        while (i < 5 && currentWord[i]["letter"] !== "")
+          i++;
+        if (i < 5)
+          currentWord[i]["letter"] = key
       }
-      else {
-        this.checkWord()
+      // backspace
+      else if (key === "Delete") {
+        // get last letter and delete it
+        let i = 0;
+        while (i < 5 && currentWord[i]["letter"] !== "")
+          i++;
+        if (i > 0)
+          currentWord[i - 1]["letter"] = ""
       }
+      else if (key === "Enter") {
+        // if word does not have 5 letter the last letter will be empty
+        if (currentWord[4]["letter"] === "") {
+          // shake row
+          this.shakeRow("Word not full")
+        }
+        else {
+          this.checkWord()
+        }
+      }
+      // set word
+      let wordsArr = this.state.wordsArr
+      wordsArr[this.state.wordsNum] = currentWord
+      this.setState({ wordsArr })
     }
-    // set word
-    let wordsArr = this.state.wordsArr
-    wordsArr[this.state.wordsNum] = currentWord
-    this.setState({wordsArr})
   }
 
   checkWord = async () => {
     try {
-      const result = await handleWord(this.state.wordsArr[this.state.wordsNum], this.state.selectedWord, this.state.hardModeOn)
-      if (result["status"] === "error") {
+      const result = await handleWord(this.state.wordsArr, this.state.selectedWord, this.state.hardModeOn, this.state.wordsNum)
+      if (result.status === "error") {
         // shake row
         this.shakeRow(result["message"])
       }
+      else if (result.status === "wrong") {
+        this.setState(prevstate => ({wordsArr: result["wordsArr"], wordsNum: prevstate.wordsNum + 1}))
+      }
       else {
-        let wordsArrTmp = this.state.wordsArr
-        wordsArrTmp[this.state.wordsNum] = result["wordArr"]
-        this.setState(prevstate => ({wordsArr: wordsArrTmp, wordsNum: prevstate.wordsNum + 1}))
+        this.setState({
+          gameFinished: true,
+          wordGuessed: result.correct,
+          wordsArr: result.wordsArr,
+          statModalVisible: true,
+          stats: result.stats
+        })
       }
         
     } catch (err) {
@@ -123,30 +144,31 @@ export default class App extends React.Component {
       document.getElementById("popup").classList.remove("showPopup")
       }, 750)
   }
+  
 
   render() {
     if (this.state.boardLoaded) {
       return (
         <div className="App">
-          <Header openModal={() => this.toggleSettingModal("settingsModalVisible")} />
+          <Header openModal={this.toggleModal} />
+
+        
+          <div className='gameContainer'>
+            <Board {...this.state} />
+
+            <Keyboard handleKeyboard={this.handleKeyboard} wordsArr={this.state.wordsArr} wordsNum={this.state.wordsNum} />
+
+            <a href='https://www.nytimes.com/games/wordle/index.html' className='footerBased' target="_blank" rel="noreferrer">Based on Wordle</a>
+          </div>
 
           <SettingsModal
             {...this.state}
             changeLanguage={this.changeLanguage}
-            toggleSettingModal={() => this.toggleSettingModal("settingsModalVisible")}
+            toggleModal={this.toggleModal}
             toggleHardMode={this.toggleHardMode}
           />
-        
-          <div className='gameContainer'>
-            <Board
-              wordsArr={this.state.wordsArr}
-              wordsNum={this.state.wordsNum}
-              selectedWord={this.state.selectedWord}
-              shakeBoard={this.state.shakeBoard}
-            />
 
-            <Keyboard handleKeyboard={this.handleKeyboard} wordsArr={this.state.wordsArr} wordsNum={this.state.wordsNum} />
-          </div>
+          <StatModal {...this.state} toggleModal={this.toggleModal} />
 
           <Popup errorMessage={this.state.errorMessage} />
         </div>
