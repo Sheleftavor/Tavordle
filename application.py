@@ -1,7 +1,6 @@
-import os
 from flask import Flask, send_from_directory, session, request, make_response
 from flask_cors import CORS, cross_origin
-import logging, json, psycopg2
+import logging, json, psycopg2, os
 import HelpFunc
 from datetime import datetime
 
