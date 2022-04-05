@@ -1,4 +1,4 @@
-from os import stat
+import os
 from flask import Flask, send_from_directory, session, request, make_response
 from flask_cors import CORS, cross_origin
 import logging, json, psycopg2
@@ -44,9 +44,8 @@ def after_request(response):
     return response
 
 # Define database
-# DATABASE_URL = os.environ['DATABASE_URL']
-# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-conn = psycopg2.connect("postgres://imzwprcviecrhh:7508e58ac73a6d99d660b68517be9820b2bfb28287eeec9db3935ebe77507bae@ec2-34-248-169-69.eu-west-1.compute.amazonaws.com:5432/d53n09ml7prg1s")
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 db = conn.cursor()
 
 @app.route("/api", methods=["GET", "POST"])
