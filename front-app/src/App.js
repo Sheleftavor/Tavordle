@@ -144,7 +144,7 @@ export default class App extends React.Component {
       document.getElementById("popup").classList.remove("showPopup")
       }, 750)
   }
-  
+
 
   render() {
     if (this.state.boardLoaded) {

@@ -21,7 +21,7 @@ export const handleWord = async (wordsArr, selectedWord, hardModeOn, wordsNum) =
 }
 
 export const getData = async () => {
-    const response = await fetch('https://tavordle.herokuapp.com/api', {
+    const response = await fetch('http://192.168.1.32:5000/api', {
         method: 'GET',
         credentials: 'include',
         mode: 'cors',

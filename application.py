@@ -125,6 +125,7 @@ def index():
             session["wordsArr"] = wordsArr
             session["date"] = today
             session["wordsNum"] = 0
+            wordsNum = 0
         
         selectedWord, wordCount = HelpFunc.generate_word(db, conn)
         
