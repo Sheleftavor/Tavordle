@@ -8,7 +8,7 @@ const Header = (props) => {
         <div className="Container">Tavordle
             <FontAwesomeIcon icon={faGear} className="gear" onClick={() => props.openModal("settingsModalVisible")} />
             <FontAwesomeIcon icon={faChartColumn} className="statIcon" onClick={() => props.openModal("statModalVisible")} />
-            <FontAwesomeIcon icon={faCircleInfo} className="info" />
+            <FontAwesomeIcon icon={faCircleInfo} className="info" onClick={() => props.openModal("infoModalVisible")}/>
         </div>
     )
 }

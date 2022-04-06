@@ -7,6 +7,7 @@ import Keyboard from './Components/Keyboard';
 import Popup from './Components/Popup';
 import { getData, handleWord } from './api';
 import StatModal from './Components/StatModal';
+import InfoModal from './Components/InfoModal';
 
 const languages = [
   { value: 'En', label: 'En' },
@@ -36,7 +37,8 @@ export default class App extends React.Component {
       stats: "",
       gameFinished: false,
       wordGuessed: false,
-      countdown: 0
+      countdown: 0,
+      infoModalVisible: false
     }
 
     this.toggleModal = this.toggleModal.bind(this)
@@ -58,7 +60,8 @@ export default class App extends React.Component {
         stats: result["stats"],
         gameFinished: result["finished"],
         wordGuessed: result["correct"],
-        statModalVisible: result["finished"]
+        statModalVisible: result["finished"],
+        infoModalVisible: result["showInfo"]
       })
       // run countdown if game finished
       if (result["finished"]) {
@@ -213,7 +216,7 @@ export default class App extends React.Component {
 
           <StatModal {...this.state} toggleModal={this.toggleModal} />
 
-          
+          <InfoModal {...this.state} toggleModal={this.toggleModal} />
 
           <Popup errorMessage={this.state.errorMessage} />
         </div>

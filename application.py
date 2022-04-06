@@ -3,6 +3,7 @@ from flask_cors import CORS, cross_origin
 import logging, json, psycopg2, os
 import HelpFunc
 from datetime import datetime
+from flask_talisman import Talisman
 
 # Configure application
 app = Flask(__name__, static_folder='front-app/build', static_url_path='')
@@ -17,6 +18,8 @@ def before_first_request():
 
 # configure cors
 CORS(app, supports_credentials=True)
+
+Talisman(app)
 
 app.config.update(
     REMEMBER_COOKIE_SECURE = True,
@@ -78,10 +81,13 @@ def index():
         # if its not first time playing
         if session.get("user_id") is not None:
             db.execute("SELECT current_streak, max_streak FROM users WHERE id = %s", (session["user_id"], ))
-            current_streak, max_streak = db.fetchone()
+            streak_data = db.fetchone()
+            if streak_data is not None:
+                current_streak, max_streak = streak_data
+            else:
+                current_streak = max_streak = 0
         else:
-            current_streak = 0
-            max_streak = 0
+            current_streak = max_streak = 0
         # if didnt guess the word
         if currentWord != selectedWord and wordsNum == 5:
             current_streak = 0
@@ -104,7 +110,7 @@ def index():
             id = db.fetchone()[0]
             session["user_id"] = id
         else:
-            db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum, wordsNum, session["user_id"]))
+            db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum + 1, wordsNum + 1, session["user_id"]))
         conn.commit()
         
         stats = HelpFunc.get_stats(db)
@@ -132,8 +138,13 @@ def index():
         
         # get stats
         stats = HelpFunc.get_stats(db)
+        
+        # check if there is a user in db if not clear session
+        db.execute("SELECT * FROM users WHERE id = %s", (session.get("user_id"),))
+        if db.fetchone() is None:
+            session.pop("user_id", None)
             
-        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount, "wordsNum": wordsNum, "stats": stats, "finished": session.get("finished") if session.get("finished") is not None else False, "correct": session.get("correct") if session.get("correct") is not None else False})
+        return json.dumps({"wordsArr": wordsArr, "selectedWord": selectedWord, "wordCount": wordCount, "wordsNum": wordsNum, "stats": stats, "finished": session.get("finished") if session.get("finished") is not None else False, "correct": session.get("correct") if session.get("correct") is not None else False, "showInfo": session.get("user_id") is None})
 
 @app.route("/")
 def serve():
