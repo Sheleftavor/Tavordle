@@ -26,9 +26,9 @@ const InfoModal = (props) => {
                     <div className="exampleBox">
                         <div className="exampleItem" style={{border: "none", backgroundColor: "#538d4e"}}>t</div>
                         <div className="exampleItem">a</div>
-                        <div className="exampleItem">b</div>
-                        <div className="exampleItem">l</div>
-                        <div className="exampleItem">e</div>
+                        <div className="exampleItem">v</div>
+                        <div className="exampleItem">o</div>
+                        <div className="exampleItem">r</div>
                     </div>
 
                     <p className="infoText">The letter <strong>T</strong> is in the word and in the correct spot.</p>

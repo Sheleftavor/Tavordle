@@ -4422,3 +4422,6 @@ zonal
 zoned
 zones
 zooms
+tavor
+eshel
+cahal
