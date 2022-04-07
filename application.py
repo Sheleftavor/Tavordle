@@ -67,6 +67,23 @@ def index():
         with open("Words.txt", "r") as wordsFile:
             if (currentWord + "\n") not in wordsFile:
                 return json.dumps({"status": "error", "message": "Invalid word"})
+            
+        # if hard mode is on validate word
+        if hardModeOn and wordsNum > 0:
+            for j, l in enumerate(wordsArr[wordsNum - 1]):
+                # if did not use the same letter at that space
+                if l["color"] == "Green" and wordArr[j]["letter"] != l["letter"]:
+                    return json.dumps({"status": "error", "message": "Letter " + str(j + 1) + " should be " + l["letter"].upper()})
+                elif l["color"] == "Orange":
+                    # check if letter is in current word
+                    exists = False
+                    for k in wordArr:
+                        if k["letter"] == l["letter"]:
+                            exists = True
+                    if not exists:
+                        return json.dumps({"status": "error", "message": l["letter"].upper() + " should be at the word"})
+                        
+                    
         
         # edit wordsArr with new guessed word        
         wordArr = HelpFunc.check_word(wordArr, selectedWord, currentWord)
