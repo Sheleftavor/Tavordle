@@ -19,7 +19,7 @@ def before_first_request():
 # configure cors
 CORS(app, supports_credentials=True)
 
-Talisman(app)
+#Talisman(app)
 
 app.config.update(
     REMEMBER_COOKIE_SECURE = True,
