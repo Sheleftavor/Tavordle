@@ -127,7 +127,10 @@ def index():
             id = db.fetchone()[0]
             session["user_id"] = id
         else:
-            db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum + 1, wordsNum + 1, session["user_id"]))
+            if currentWord == selectedWord:
+                db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum + 1, wordsNum + 1, session["user_id"]))
+            else:
+                db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1 WHERE id = %s", (current_streak, max_streak, session["user_id"]))
         conn.commit()
         
         stats = HelpFunc.get_stats(db)
