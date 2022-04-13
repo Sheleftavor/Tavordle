@@ -153,7 +153,7 @@ export default class App extends React.Component {
         })
 
         // if word not guessed show word
-        if (!result.correct && result.finished) {
+        if (!result.correct && result.status === "finished") {
           this.setState({ errorMessage: this.state.selectedWord })
           document.getElementById("popup").classList.add("showPopup")
         }

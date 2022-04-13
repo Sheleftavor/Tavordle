@@ -90,7 +90,7 @@ def index():
         wordsArr[wordsNum] = wordArr
         session["wordsArr"] = wordsArr
         
-        # if wrong guess and there are guesses left
+        # if wrong guess and gamenot finished return to game
         if currentWord != selectedWord and wordsNum < 5:
             session["wordsNum"] = int(wordsNum) + 1
             return json.dumps({"status": "wrong", "wordsArr": wordsArr})
@@ -119,7 +119,7 @@ def index():
             # initilize games arr
             gamesArr = [0 for i in range(6)]
             # add guess place to array
-            if not (currentWord != selectedWord and wordsNum == 5):
+            if currentWord == selectedWord:
                 gamesArr[wordsNum] += 1
             # insert into db
             db.execute("INSERT INTO users (current_streak, max_streak, total_games, games) VALUES (%s, %s, %s, %s) RETURNING id", (current_streak, max_streak, 1, gamesArr))
@@ -127,6 +127,7 @@ def index():
             id = db.fetchone()[0]
             session["user_id"] = id
         else:
+            # if word guessed add guess number to array
             if currentWord == selectedWord:
                 db.execute("UPDATE users SET current_streak = %s, max_streak = %s, total_games = total_games + 1, games[%s] = games[%s] + 1 WHERE id = %s", (current_streak, max_streak, wordsNum + 1, wordsNum + 1, session["user_id"]))
             else:
