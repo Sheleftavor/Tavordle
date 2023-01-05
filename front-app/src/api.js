@@ -21,7 +21,7 @@ export const handleWord = async (wordsArr, selectedWord, hardModeOn, wordsNum) =
 }
 
 export const getData = async () => {
-    const response = await fetch('https://tavordle.onrender.com//api', {
+    const response = await fetch('https://tavordle.onrender.com/api', {
         method: 'GET',
         credentials: 'include',
         mode: 'cors',
